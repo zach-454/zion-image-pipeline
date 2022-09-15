@@ -24,7 +24,7 @@ def unpack_12_8_raw(line):
         color2.append(byte2)
     return np.array(color1), np.array(color2)
 
-def jpg_to_raw(filepath, target_path):
+def jpg_to_raw(filepath, target_path, compression=None):
     
     # grab raw data from end of file:
     with open(filepath, "rb") as f:
@@ -58,8 +58,8 @@ def jpg_to_raw(filepath, target_path):
     # Now reshape images and write to 16-bit color tiff:
     filename =  os.path.splitext(target_path)[0]
     color_image = np.stack([red_image, green_image, blue_image], axis=-1).reshape((img_H, img_W, 3))
-    imwrite(filename+".tif", color_image, photometric='rgb')
-    print("Wrote file "+filename+".tif")
+    imwrite(filename+".tiff", color_image, photometric='rgb', compression=compression)
+    print("Wrote file "+filename+".tiff")
 
     #images available to return if desired:
     return red_image, green_image, blue_image
@@ -73,6 +73,15 @@ if __name__ == "__main__":
 
     if not os.path.exists(target_dir) or not os.path.isdir(target_dir):
         raise Exception("Invalid target directory given!")
+
+    if len(sys.argv)>2:
+        compression_opt = sys.argv[2]
+        if compression_opt=='-lzw':
+            compression = 5
+        else: #TODO: add more options here?
+            compression = None
+    else:
+        compression = None
     
     target_dir = os.path.realpath(target_dir)
     print("Working in directory " + target_dir)
@@ -88,6 +97,6 @@ if __name__ == "__main__":
             print(os.path.splitext(os.path.basename(jpg_file))[0]+" is too small to contain raw data! Skipping.")
         else:
             newpath = os.path.join(os.path.dirname(jpg_file), "raws", os.path.basename(jpg_file))
-            jpg_to_raw(jpg_file, newpath)
+            jpg_to_raw(jpg_file, newpath, compression=compression)
             file_count += 1
     print("Done! Converted " + str(file_count) + " files.")
