@@ -2,7 +2,7 @@ import os
 import sys
 import glob
 import numpy as np
-from tifffile import imwrite
+from tifffile import imread, imwrite
 #from imx477_raw import jpg_to_raw
 
 offset_from_end = 0x11D81FF #hexidecimal
